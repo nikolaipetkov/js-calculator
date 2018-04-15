@@ -2,8 +2,8 @@
 // starting with minus not handled correctly
 // missing chaining functionality
 
-var currentNumber = "",
-	oldNumber = "",
+var currentNumber = '',
+	oldNumber = '',
 	operator,
 	currentInput,
 	dotAlreadyUsedInCurrentNumber = false,
@@ -32,7 +32,7 @@ var currentNumber = "",
 			currentInput = event.key;
 		}
 		
-		if(currentNumber.length >= 10){
+		if(currentNumber.length >= 15){
 			return;
 		}
 		if(resultElement.textContent && currentInput === '.' && !dotAlreadyUsedInCurrentNumber){
@@ -70,7 +70,7 @@ var currentNumber = "",
 			operatorElement.textContent = currentInput;
 		} else {
 			oldNumber = currentNumber;
-			currentNumber = "";
+			currentNumber = '';
 			operator = currentInput;
 			operatorElement.textContent = currentInput;
 			dotAlreadyUsedInCurrentNumber = false;
@@ -78,6 +78,12 @@ var currentNumber = "",
 	}
 	
 	function equalsAction(){
+		if(currentNumber === '.'){
+			currentNumber = '0';
+		} else if(oldNumber === '.'){
+			oldNumber = '0';
+		}
+
 		if(oldNumber && currentNumber && operator){
 			oldNumber = parseFloat(oldNumber);
 			currentNumber = parseFloat(currentNumber);
@@ -96,7 +102,7 @@ var currentNumber = "",
 					break;
 
 				case "/":
-					if(currentNumber === 0){
+					if(currentNumber === 0 || currentNumber !== currentNumber /*true if currentNumber isNaN*/){
 						resultElement.textContent = 'Cannot divide by zero';
 					} else {
 						resultElement.textContent = oldNumber / currentNumber;
@@ -108,29 +114,27 @@ var currentNumber = "",
 					break;
 
 			}
+		} else {
+			return;
 		}
 
-		oldNumber = "";
-		currentNumber = "";
-		operator = "";
+		oldNumber = '';
+		currentNumber = '';
+		operator = '';
 		operatorElement.textContent = '';
 		dotAlreadyUsedInCurrentNumber = false;
-		if(resultElement.textContent.length > 10){
-			resultElement.style.fontSize = "large";
-		}
 	}
 	
 	function clearAction(){
-		oldNumber = "";
-		currentNumber = "";
-		operator = "";
+		oldNumber = '';
+		currentNumber = '';
+		operator = '';
 		operatorElement.textContent = '';
 		resultElement.textContent = '';
 		dotAlreadyUsedInCurrentNumber = false;
 	}
 
 window.addEventListener("load",function() {
-
 	addHandler(digitsList, digitHandler, true);
 	
 	addHandler(operatorsList, operatorAction, true);
@@ -140,7 +144,7 @@ window.addEventListener("load",function() {
 	addHandler(clearElement, clearAction);
 	
 	//KEYBOARD FUNCTIONALITY
-	window.addEventListener('keyup', function(e){
+	window.addEventListener('keydown', function(e){
 		/*keycodes legend:
 		48-57 upper keyboard digits
 		96-105 numpad digits
@@ -152,11 +156,16 @@ window.addEventListener("load",function() {
 		109 - numpad
 		106 * numpad
 		111 / numpad*/
-
 		
 		//upper keyboard digits OR numpad digits OR dot codes
 		if((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105) || e.keyCode === 110){
 			digitHandler(e, true);
+		}
+
+		//enter OR equals 
+		if(e.keyCode === 13 || e.keyCode === 187){
+			event.preventDefault(); //bugfix for default enter behaviour when a button was clicked with the mouse and then enter is pressed
+			equalsAction()
 		}
 		
 		//operators codes
@@ -169,9 +178,5 @@ window.addEventListener("load",function() {
 			clearAction();
 		}
 		
-		//enter OR equals 
-		if(e.keyCode === 13 || e.keyCode === 187){
-			equalsAction()
-		}
 	});
 });
