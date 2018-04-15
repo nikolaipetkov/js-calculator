@@ -1,5 +1,4 @@
 //Known issues
-// starting with minus not handled correctly
 // missing chaining functionality
 
 var currentNumber = '',
@@ -7,12 +6,13 @@ var currentNumber = '',
 	operator,
 	currentInput,
 	dotAlreadyUsedInCurrentNumber = false,
-	operatorElement = document.getElementById('operator')
+	startedWithMinus = false,
+	operatorElement = document.getElementById('operator'),
 	operatorsList = document.querySelectorAll('.operator'),
 	resultElement = document.getElementById('result'),
 	equalsElement = document.getElementById('equals'),
 	clearElement = document.getElementById('clear'),
-	digitsList = document.querySelectorAll('.digit')
+	digitsList = document.querySelectorAll('.digit');
 
 	
 	function addHandler(element, func, isElementNodeList){
@@ -23,7 +23,7 @@ var currentNumber = '',
 		} else {
 			element.addEventListener('click', func);
 		}
-	}
+	};
 
 	function digitHandler(event, isKeyboardEvent){
 		currentInput = event.target.textContent;
@@ -53,7 +53,7 @@ var currentNumber = '',
 		}
 
 		resultElement.textContent = currentNumber;
-	}	
+	};	
 
 	function operatorAction(event, isKeyboardEvent){
 		currentInput = event.target.textContent;
@@ -62,8 +62,16 @@ var currentNumber = '',
 			currentInput = event.key;
 		}
 
-		if(!currentNumber && !oldNumber){
-			console.warn('select a number first');
+		if(!currentNumber && !oldNumber && !startedWithMinus){
+			if(currentInput === '-'){
+				currentNumber = '-';
+				resultElement.textContent = '-';
+				startedWithMinus = true;
+			}
+			/*console.warn('select a number first');*/
+			return;
+		} else if(currentNumber === '-' && !oldNumber && startedWithMinus){
+			console.warn('already started with minus sign');
 			return;
 		} else if(operator){
 			operator = currentInput;
@@ -75,16 +83,14 @@ var currentNumber = '',
 			operatorElement.textContent = currentInput;
 			dotAlreadyUsedInCurrentNumber = false;
 		}
-	}
+	};
 	
 	function equalsAction(){
 		if(currentNumber === '.'){
 			currentNumber = '0';
 		} else if(oldNumber === '.'){
 			oldNumber = '0';
-		}
-
-		if(oldNumber && currentNumber && operator){
+		} else if(oldNumber && currentNumber && operator){
 			oldNumber = parseFloat(oldNumber);
 			currentNumber = parseFloat(currentNumber);
 
@@ -118,11 +124,17 @@ var currentNumber = '',
 			return;
 		}
 
+		if(resultElement.textContent){
+			resultElement.textContent = parseFloat(resultElement.textContent).toFixed(7); //7 here is kinda magical number but I guess it's a sensible choice
+			resultElement.textContent = parseFloat(resultElement.textContent); //stripping unneeded zeros at the end
+		}
+
 		oldNumber = '';
 		currentNumber = '';
 		operator = '';
 		operatorElement.textContent = '';
 		dotAlreadyUsedInCurrentNumber = false;
+		startedWithMinus = false;
 	}
 	
 	function clearAction(){
@@ -132,6 +144,7 @@ var currentNumber = '',
 		operatorElement.textContent = '';
 		resultElement.textContent = '';
 		dotAlreadyUsedInCurrentNumber = false;
+		startedWithMinus = false;
 	}
 
 window.addEventListener("load",function() {
