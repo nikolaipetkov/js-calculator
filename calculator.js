@@ -124,6 +124,7 @@ var currentNumber = "",
 		oldNumber = "";
 		currentNumber = "";
 		operator = "";
+		operatorElement.textContent = '';
 		resultElement.textContent = '';
 		dotAlreadyUsedInCurrentNumber = false;
 	}
